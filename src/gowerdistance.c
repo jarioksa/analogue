@@ -54,7 +54,6 @@ double xx_gowerpodani(double *x, int nr, int nc, int i1, int i2,
     for (j=0; j<nc; j++ ) {
 	if (R_FINITE(x[i1]) && R_FINITE(x[i2])) {
 	    switch(vtype[j]) {
-	    case BINARY:
 	    case METRICORDINAL:
 	    case METRICINTERNAL:
 	    case METRIC:
@@ -62,6 +61,7 @@ double xx_gowerpodani(double *x, int nr, int nc, int i1, int i2,
 		dist += fabs(x[i1]-x[i2])/scale[j];
 		count++;
 		break;
+	    case BINARY:
 	    case PRESENCE:
 		if (x[i1] > 0 || x[i2] > 0) {
 		    dist += fabs(x[i1]-x[i2])/scale[j];
