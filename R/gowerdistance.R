@@ -37,19 +37,10 @@
 #' implementations. There is no explicit \dQuote{symmetric binary}
 #' because this is similar as treating variable as \code{"C"}.
 
-#' @return Function returns a numeric data matrix that can be used in
-#' C function. Factors are replaced with their internal values,
-#' ordered factors by their internal values or ranks as requested,
-#' binary variables are guaranteed to have a zero level. If there are
-#' any variables of \code{vtypes = "OP"}, a new column of number of
-#' ties for each observation (including tie to itself) is added. Two
-#' attributes are added. Attribute \code{"vtypes"} gives the
-#' interpreted types as defined above and \code{vtypes = "T"} is used
-#' for possible new columns of ties. Attribute \code{scale} gives the
-#' scale used in C code. Usually this is the range of variables (and
-#' will be ignored for \code{vtypes = "N"}), but for \code{vtypes =
-#' "OP"} the scale is adjusted for the number of ties.
+#' @return Function returns dissimilarities as a vector without
+#'     attributes (i.e., no class either).
 #'
+
 #' 
 #' @param x Input data frame possibly with different data types
 #' @param ordered Policy of interpreting ordered factors (see Details).
@@ -142,8 +133,12 @@
         scale <- c(scale, scale[typ])
         vtypes <- c(vtypes, rep("T", sum(typ)))
     }
-    ## return x with attributes we need for Gower distance
-    attr(x, "vtypes") <- types[vtypes]
-    attr(x, "scale") <- scale
-    x
+
+    N <- NROW(x)
+    d <- .C("gowerdriver", x = as.double(x), nr = as.integer(N),
+            nc = as.integer(NCOL(x)), d = double(N * (N-1)/2),
+            diag = as.integer(FALSE), vtype = as.integer(types[vtypes]),
+            scale = as.double(scale))$d
+    ## return dissimilarities as a vector without attributes
+    d
 }

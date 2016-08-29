@@ -117,3 +117,18 @@ double xx_gowerpodani(double *x, int nr, int nc, int i1, int i2,
    k. That is the column we must add to the input data. 
 
  */
+
+/* Driver */
+
+void gowerdriver(double *x, int *nr, int *nc, double *d,
+		   int *diag, int *vtype, double *scale)
+{
+    int dc, i, j, ij;
+    dc = (*diag) ? 0 : 1;
+
+    ij = 0;
+
+    for (j=0; j <= *nr; j++)
+        for (i=j+dc; i < *nr; i++) 
+            d[ij++] = xx_gowerpodani(x, *nr, *nc, i, j, vtype, scale);
+}
