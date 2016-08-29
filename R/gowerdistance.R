@@ -143,7 +143,7 @@
         vtypes <- c(vtypes, rep("T", sum(typ)))
     }
     ## return x with attributes we need for Gower distance
-    attr(x, "vtypes") <- vtypes
+    attr(x, "vtypes") <- types[vtypes]
     attr(x, "scale") <- scale
     x
 }
