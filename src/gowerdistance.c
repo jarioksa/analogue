@@ -43,21 +43,32 @@
 */
 
 double xx_gowerpodani(double *x, int nr, int nc, int i1, int i2,
-		      int *vtype, double *scale)
+		      int *vtype, double *scale, int *ispod)
 {
-    double dist;
-    int j, count;
+    double dist, dev;
+    int j, count, iord, itie;
 
     dist = 0.0;
     count = 0;
+    iord = 0;
+    itie = 0;
 
     for (j=0; j<nc; j++ ) {
 	if (R_FINITE(x[i1]) && R_FINITE(x[i2])) {
 	    switch(vtype[j]) {
+	    case ORDINAL:
+		ispod[iord] = 0;
+		dev = fabs(x[i1] - x[i2])/scale[j];
+		if (dev > 0) {
+		    ispod[iord] = 1;
+		    dist += dev;
+		}
+		iord++;
+		count++;
+		break;
 	    case METRICORDINAL:
 	    case METRICINTERNAL:
 	    case METRIC:
-	    case ORDINAL:
 		dist += fabs(x[i1]-x[i2])/scale[j];
 		count++;
 		break;
@@ -73,7 +84,9 @@ double xx_gowerpodani(double *x, int nr, int nc, int i1, int i2,
 		count++;
 		break;
 	    case TIE:
-		dist -= ((x[i1] + x[i2]) / 2.0 - 1.0) / scale[j];
+		if (ispod[itie] > 0)
+		    dist -= ((x[i1] + x[i2]) / 2.0 - 1.0) / scale[j];
+		itie++;
 		break;
 	    }
 	}
@@ -121,7 +134,7 @@ double xx_gowerpodani(double *x, int nr, int nc, int i1, int i2,
 /* Driver */
 
 void gowerdriver(double *x, int *nr, int *nc, double *d,
-		   int *diag, int *vtype, double *scale)
+		 int *diag, int *vtype, double *scale, int *ispod)
 {
     int dc, i, j, ij;
     dc = (*diag) ? 0 : 1;
@@ -130,5 +143,5 @@ void gowerdriver(double *x, int *nr, int *nc, double *d,
 
     for (j=0; j <= *nr; j++)
         for (i=j+dc; i < *nr; i++) 
-            d[ij++] = xx_gowerpodani(x, *nr, *nc, i, j, vtype, scale);
+            d[ij++] = xx_gowerpodani(x, *nr, *nc, i, j, vtype, scale, ispod);
 }
