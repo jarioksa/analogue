@@ -139,10 +139,16 @@ double xx_gowerpodani(double *x, int nr, int nc, int i1, int i2,
 /* Driver */
 
 void gowerdriver(double *x, int *nr, int *nc, double *d,
-		 int *diag, int *vtype, double *scale, int *isdev)
+		 int *diag, int *vtype, double *scale)
 {
     int dc, i, j, ij;
+    int *isdev;
+
     dc = (*diag) ? 0 : 1;
+
+    /* allocate work array for gowerpodani */
+
+    isdev = (int *) R_alloc(*nc, sizeof(int));
 
     ij = 0;
 

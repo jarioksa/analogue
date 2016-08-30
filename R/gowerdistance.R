@@ -138,7 +138,7 @@
     d <- .C("gowerdriver", x = as.double(x), nr = as.integer(N),
             nc = as.integer(NCOL(x)), d = double(N * (N-1)/2),
             diag = as.integer(FALSE), vtype = as.integer(types[vtypes]),
-            scale = as.double(scale), integer(NCOL(x)))$d
+            scale = as.double(scale))$d
     ## return dissimilarities as a vector without attributes
     d
 }
