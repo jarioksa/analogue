@@ -26,7 +26,7 @@
 #define METRIC 7
 #define TIE 8
 
-/* Function adds two arguments to the normal call. Both of these are
+/* Function adds three arguments to the normal call. Both of these are
    vectors of lenght nc:
 
    vtype: variable type as #define'd above
@@ -37,13 +37,19 @@
    the Podani denominator. These must be calculated in the calling
    program.
 
+   isdev: work vector to hold information on non-zero difference in
+   the Manthattan component of ORDINAL dissimilarity. This is needed
+   because TIE correction will be only applied if dev > 0. The vector
+   length should be sufficient to have informateion on all ORDINAL
+   variables, and nc is safe.
+
    NB. This does not have weights but adding these is trivial (or they
    can be incorporated in scale).
 
 */
 
 double xx_gowerpodani(double *x, int nr, int nc, int i1, int i2,
-		      int *vtype, double *scale, int *ispod)
+		      int *vtype, double *scale, int *isdev)
 {
     double dist, dev;
     int j, count, iord, itie;
@@ -57,13 +63,13 @@ double xx_gowerpodani(double *x, int nr, int nc, int i1, int i2,
 	if (R_FINITE(x[i1]) && R_FINITE(x[i2])) {
 	    switch(vtype[j]) {
 	    case ORDINAL:
-		ispod[iord] = 0;
 		dev = fabs(x[i1] - x[i2])/scale[j];
 		if (dev > 0) {
-		    ispod[iord] = 1;
+		    isdev[iord++] = 1;
 		    dist += dev;
+		} else {
+		    isdev[iord++] = 0;
 		}
-		iord++;
 		count++;
 		break;
 	    case METRICORDINAL:
@@ -84,9 +90,8 @@ double xx_gowerpodani(double *x, int nr, int nc, int i1, int i2,
 		count++;
 		break;
 	    case TIE:
-		if (ispod[itie] > 0)
+		if (isdev[itie++] > 0)
 		    dist -= ((x[i1] + x[i2]) / 2.0 - 1.0) / scale[j];
-		itie++;
 		break;
 	    }
 	}
@@ -134,7 +139,7 @@ double xx_gowerpodani(double *x, int nr, int nc, int i1, int i2,
 /* Driver */
 
 void gowerdriver(double *x, int *nr, int *nc, double *d,
-		 int *diag, int *vtype, double *scale, int *ispod)
+		 int *diag, int *vtype, double *scale, int *isdev)
 {
     int dc, i, j, ij;
     dc = (*diag) ? 0 : 1;
@@ -143,5 +148,5 @@ void gowerdriver(double *x, int *nr, int *nc, double *d,
 
     for (j=0; j <= *nr; j++)
         for (i=j+dc; i < *nr; i++) 
-            d[ij++] = xx_gowerpodani(x, *nr, *nc, i, j, vtype, scale, ispod);
+            d[ij++] = xx_gowerpodani(x, *nr, *nc, i, j, vtype, scale, isdev);
 }
